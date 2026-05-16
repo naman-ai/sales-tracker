@@ -62,21 +62,28 @@ export default function Leaderboard({ userName, date, refreshKey }: Props) {
       {entries.length === 0 ? (
         <div className="lb-empty">no calls yet today ✨</div>
       ) : (
-        entries.map((e, i) => (
-          <div className="lb-row" key={e.user_name}>
-            <span className={`lb-rank ${i === 0 ? 'top' : ''}`}>
-              {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
-            </span>
-            <span className={`lb-name ${e.user_name === userName ? 'is-you' : ''}`}>
-              {e.user_name}{e.user_name === userName ? ' (you)' : ''}
-            </span>
-            <span className="lb-stats">
-              <span className="lb-total">{e.total} calls</span>
-              <span className="lb-rate">{e.connect_rate}% conn</span>
-              <span className="lb-meetings">{e.meetings} mtg</span>
-            </span>
+        <>
+          <div className="lb-header">
+            <span className="lb-col-label">#</span>
+            <span className="lb-col-label" style={{ textAlign: 'left' }}>name</span>
+            <span className="lb-col-label">calls</span>
+            <span className="lb-col-label">conn</span>
+            <span className="lb-col-label">mtg</span>
           </div>
-        ))
+          {entries.map((e, i) => (
+            <div className="lb-row" key={e.user_name}>
+              <span className={`lb-rank${i === 0 ? ' top' : ''}`}>
+                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
+              </span>
+              <span className={`lb-name${e.user_name === userName ? ' is-you' : ''}`}>
+                {e.user_name}{e.user_name === userName ? ' ✦' : ''}
+              </span>
+              <span className="lb-total">{e.total}</span>
+              <span className="lb-rate">{e.connect_rate}%</span>
+              <span className="lb-meetings">{e.meetings}</span>
+            </div>
+          ))}
+        </>
       )}
     </div>
   )

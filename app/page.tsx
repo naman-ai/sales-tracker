@@ -179,29 +179,32 @@ export default function Home() {
 
       <div className="spacer-top" />
 
-      <div className="page-wrap">
+      <div className="page-outer">
+
+        {/* Header — full width */}
+        <header>
+          <div className="eyebrow">Outbound calls</div>
+          <h1>Call Tally 🌊</h1>
+          <div className="date-display">{dateLabel}</div>
+          {saving && <div className="date-display" style={{ color: '#9ed0d0', marginTop: 2 }}>saving…</div>}
+        </header>
+
+        {/* Date tabs — full width */}
+        <div className="date-tabs">
+          {last7Days().map(d => (
+            <button
+              key={d}
+              className={`date-tab${selectedDate === d ? ' active' : ''}`}
+              onClick={() => setSelectedDate(d)}
+            >
+              {fmt(d)}
+            </button>
+          ))}
+        </div>
+
+        {/* Two columns */}
+        <div className="two-col">
         <div className="main-col">
-
-          {/* Header */}
-          <header>
-            <div className="eyebrow">Outbound calls</div>
-            <h1>Call Tally 🌊</h1>
-            <div className="date-display">{dateLabel}</div>
-            {saving && <div className="date-display" style={{ color: '#9ed0d0', marginTop: 2 }}>saving…</div>}
-          </header>
-
-          {/* Date tabs */}
-          <div className="date-tabs">
-            {last7Days().map(d => (
-              <button
-                key={d}
-                className={`date-tab${selectedDate === d ? ' active' : ''}`}
-                onClick={() => setSelectedDate(d)}
-              >
-                {fmt(d)}
-              </button>
-            ))}
-          </div>
 
           {/* Tally grid */}
           <div className="tally-grid">
@@ -281,12 +284,13 @@ export default function Home() {
 
         </div>
 
-        {/* Right sidebar — leaderboard */}
-        <div className="side-col">
-          <Leaderboard userName={userName} date={selectedDate} refreshKey={lbRefresh} />
-        </div>
+          {/* Right sidebar — leaderboard */}
+          <div className="side-col">
+            <Leaderboard userName={userName} date={selectedDate} refreshKey={lbRefresh} />
+          </div>
 
-      </div>
+        </div>{/* end two-col */}
+      </div>{/* end page-outer */}
     </>
   )
 }
