@@ -141,21 +141,20 @@ export default function Home() {
     }
   }
 
-  async function resetAll() {
+  function resetAll() {
     if (!isToday) return
     if (!confirm('Reset your tallies for today to zero?')) return
     setCounts(EMPTY_COUNTS)
     setMeetings(0)
     setLog([])
     if (userName) {
-      await supabase.from('daily_stats').upsert({
+      supabase.from('daily_stats').upsert({
         user_name: userName,
         date: todayISO(),
         na_count: 0, vm_count: 0, cb_count: 0, conn_count: 0, busy_count: 0,
         meetings: 0,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_name,date' })
-      setLbRefresh(r => r + 1)
+      }, { onConflict: 'user_name,date' }).then(() => setLbRefresh(r => r + 1))
     }
   }
 
