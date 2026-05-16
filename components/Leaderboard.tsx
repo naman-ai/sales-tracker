@@ -50,6 +50,12 @@ export default function Leaderboard({ userName, date, refreshKey }: Props) {
 
   const isToday = date === todayISO()
 
+  async function resetLeaderboard() {
+    if (!confirm(`Reset all players' data for ${isToday ? 'today' : date}? This cannot be undone.`)) return
+    await supabase.from('daily_stats').delete().eq('date', date)
+    load()
+  }
+
   return (
     <div className="leaderboard-card">
       <div className="leaderboard-title">
@@ -86,6 +92,14 @@ export default function Leaderboard({ userName, date, refreshKey }: Props) {
             </div>
           ))}
         </>
+      )}
+
+      {entries.length > 0 && (
+        <div style={{ marginTop: 12, textAlign: 'center' }}>
+          <button className="reset-btn" onClick={resetLeaderboard}>
+            reset players
+          </button>
+        </div>
       )}
     </div>
   )

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -57,7 +57,7 @@ body {
   min-width: 0;
 }
 .side-col {
-  width: 260px;
+  width: 340px;
   flex-shrink: 0;
   position: sticky;
   top: 70px;
@@ -74,13 +74,13 @@ header { margin-bottom: 1.5rem; text-align: center; }
   font-family: 'DM Mono', monospace;
   margin-bottom: 4px;
 }
-h1 { font-size: 28px; font-weight: 400; color: #1a7a7a; font-family: 'DM Sans', sans-serif; }
+h1 { font-size: 28px; font-weight: 700; color: #1a7a7a; font-family: 'DM Sans', sans-serif; text-transform: uppercase; letter-spacing: 0.08em; }
 .quote-display {
-  font-size: 12px;
-  color: #5bbcbc;
+  font-size: 14px;
+  color: #0f2e2e;
   font-family: 'DM Mono', monospace;
   font-style: italic;
-  margin-top: 6px;
+  margin-top: 8px;
   opacity: 0;
   transition: opacity 0.4s ease;
 }
@@ -89,7 +89,7 @@ h1 { font-size: 28px; font-weight: 400; color: #1a7a7a; font-family: 'DM Sans', 
   font-size: 12px;
   color: #7ab8b8;
   font-family: 'DM Mono', monospace;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 /* ── Tally grid ── */
@@ -119,6 +119,7 @@ h1 { font-size: 28px; font-weight: 400; color: #1a7a7a; font-family: 'DM Sans', 
   align-items: center;
   justify-content: center;
   gap: 6px;
+  min-height: 32px;
 }
 .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .tally-count {
@@ -146,7 +147,7 @@ h1 { font-size: 28px; font-weight: 400; color: #1a7a7a; font-family: 'DM Sans', 
 }
 .tally-btn:hover { background: #d6f0f0; }
 .tally-btn:active { transform: scale(0.9); }
-.plus-btn { width: 42px; height: 42px; font-size: 24px; }
+.plus-btn { width: 36px; height: 36px; font-size: 22px; }
 
 /* ── Meetings card ── */
 .meetings-card {
@@ -279,7 +280,7 @@ h1 { font-size: 28px; font-weight: 400; color: #1a7a7a; font-family: 'DM Sans', 
   background: #fff;
   border: 1.5px solid #b2e0e0;
   border-radius: 20px;
-  padding: 1.2rem 0.6rem;
+  padding: 1.2rem 0.4rem;
   margin-bottom: 10px;
   box-shadow: 0 2px 10px rgba(91,188,188,0.08);
 }
@@ -292,13 +293,13 @@ h1 { font-size: 28px; font-weight: 400; color: #1a7a7a; font-family: 'DM Sans', 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.6rem;
+  padding: 0 0.4rem;
 }
 .live-dot {
   display: inline-block;
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #1a9a9a;
+  background: #e53e3e;
   animation: pulse 2s infinite;
 }
 @keyframes pulse {

@@ -43,7 +43,7 @@ const QUOTES = [
 const EMPTY_COUNTS: Record<Category, number> = { na: 0, vm: 0, cb: 0, conn: 0, busy: 0 }
 
 function last7Days(): string[] {
-  return Array.from({ length: 7 }, (_, i) => {
+  return Array.from({ length: 14 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - i)
     return d.toISOString().slice(0, 10)
@@ -71,7 +71,6 @@ export default function Home() {
   const [log, setLog] = useState<{ label: string; t: string }[]>([])
   const [selectedDate, setSelectedDate] = useState(todayISO())
   const [lbRefresh, setLbRefresh] = useState(0)
-  const [saving, setSaving] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isToday = selectedDate === todayISO()
 
@@ -132,7 +131,6 @@ export default function Home() {
   const scheduleSync = useCallback((nextCounts: Record<Category, number>, nextMeetings: number) => {
     if (!userName) return
     if (saveTimer.current) clearTimeout(saveTimer.current)
-    setSaving(true)
     saveTimer.current = setTimeout(async () => {
       await supabase.from('daily_stats').upsert({
         user_name: userName,
@@ -146,7 +144,6 @@ export default function Home() {
         meetings: nextMeetings,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_name,date' })
-      setSaving(false)
       setLbRefresh(r => r + 1)
     }, 600)
   }, [userName, avatar, selectedDate])
@@ -246,7 +243,6 @@ export default function Home() {
             {QUOTES[quoteIdx]}
           </div>
           <div className="date-display" style={{ marginTop: 6 }}>{dateLabel} · {clock}</div>
-          {saving && <div className="date-display" style={{ color: '#9ed0d0', marginTop: 2 }}>saving…</div>}
         </header>
 
         {/* Date tabs — full width */}
