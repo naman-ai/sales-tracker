@@ -4,9 +4,41 @@ import { supabase, todayISO } from '@/lib/supabase'
 import { CATEGORIES, Category, DailyStat, totalAttempts } from '@/lib/types'
 import NamePrompt from '@/components/NamePrompt'
 import Leaderboard from '@/components/Leaderboard'
+import StatsPanel from '@/components/StatsPanel'
 
 const ANIMALS = ['🐱','🐶','🐰','🦊','🐻','🐼','🐨','🐸','🐧','🦋','🐝','🦄','🐙','🐬','🦙','🐮','🐷','🐔','🦜','🦔','🐿️','🦭','🐺','🦊']
 const HEARTS  = ['💕','💖','💗','💓','💝','😘','✨','💫','🌊','💞','❤️','🥰','💌','🩵','🫧']
+
+const QUOTES = [
+  "dial first. doubt never. 🔥",
+  "the gatekeeper blinked first. you didn't. 😤",
+  "voicemail is just a delayed yes. 📬",
+  "your competition is sitting in their feelings. you're dialing. 💪",
+  "they can smell the fear. don't have any. 🦁",
+  "no answer is not a no — it's a not yet. ⏳",
+  "every legend started with a cold list and a prayer. 🙏",
+  "the quota doesn't negotiate. neither do you. 🤝",
+  "smile. dial. get ghosted. repeat. 👻",
+  "rejection is just redirection. painful, but still. 🚀",
+  "the phone won't dial itself. unfortunately. 📞",
+  "your pipeline is a garden. water it or cry later. 🌱",
+  "coffee is for closers. dials are for winners. ☕",
+  "be the gatekeeper's worst nightmare. 😈",
+  "every no is just a yes wearing a disguise. 🕵️",
+  "they hung up? cute. call back tomorrow. 😇",
+  "you're not cold calling. you're warm hugging. 🫂",
+  "make it rain, one awkward pause at a time. 🌧️",
+  "somewhere out there, a deal is waiting. go find it. 🗺️",
+  "your CRM is judging you. prove it wrong. 📊",
+  "objections are just questions in a bad mood. 🙄",
+  "the market doesn't care. dial anyway. 📈",
+  "you miss 100% of the calls you don't make. 🏒",
+  "another voicemail, another chance to shine. ✨",
+  "the best salespeople got told no more than anyone. 🥇",
+  "outbound isn't dead. it's just resting. 💤",
+  "pick up the phone. your mortgage isn't paying itself. 🏠",
+  "one more dial. just one more. okay, one more after that. 🔄",
+]
 
 const EMPTY_COUNTS: Record<Category, number> = { na: 0, vm: 0, cb: 0, conn: 0, busy: 0 }
 
@@ -30,6 +62,10 @@ function fmt(iso: string) {
 
 export default function Home() {
   const [userName, setUserName] = useState<string | null>(null)
+  const [avatar, setAvatar] = useState<string>('🐱')
+  const [quoteIdx, setQuoteIdx] = useState(0)
+  const [quoteFade, setQuoteFade] = useState(true)
+  const [clock, setClock] = useState('')
   const [counts, setCounts] = useState<Record<Category, number>>(EMPTY_COUNTS)
   const [meetings, setMeetings] = useState(0)
   const [log, setLog] = useState<{ label: string; t: string }[]>([])
@@ -39,10 +75,34 @@ export default function Home() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isToday = selectedDate === todayISO()
 
-  // Read name from localStorage on mount
+  // Stockholm clock
   useEffect(() => {
-    const stored = localStorage.getItem('ct_user_name')
-    if (stored) setUserName(stored)
+    function tick() {
+      setClock(new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }))
+    }
+    tick()
+    const id = setInterval(tick, 60000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Rotate quotes
+  useEffect(() => {
+    const id = setInterval(() => {
+      setQuoteFade(false)
+      setTimeout(() => {
+        setQuoteIdx(i => (i + 1) % QUOTES.length)
+        setQuoteFade(true)
+      }, 400)
+    }, 6000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Read name + avatar from localStorage on mount
+  useEffect(() => {
+    const storedName = localStorage.getItem('ct_user_name')
+    const storedAvatar = localStorage.getItem('ct_user_avatar')
+    if (storedName) setUserName(storedName)
+    if (storedAvatar) setAvatar(storedAvatar)
   }, [])
 
   // Load stats for selected date
@@ -70,13 +130,14 @@ export default function Home() {
 
   // Debounced upsert to Supabase
   const scheduleSync = useCallback((nextCounts: Record<Category, number>, nextMeetings: number) => {
-    if (!userName || !isToday) return
+    if (!userName) return
     if (saveTimer.current) clearTimeout(saveTimer.current)
     setSaving(true)
     saveTimer.current = setTimeout(async () => {
       await supabase.from('daily_stats').upsert({
         user_name: userName,
-        date: todayISO(),
+        avatar,
+        date: selectedDate,
         na_count: nextCounts.na,
         vm_count: nextCounts.vm,
         cb_count: nextCounts.cb,
@@ -88,10 +149,9 @@ export default function Home() {
       setSaving(false)
       setLbRefresh(r => r + 1)
     }, 600)
-  }, [userName, isToday])
+  }, [userName, avatar, selectedDate])
 
   function change(key: Category, delta: number) {
-    if (!isToday) return
     const cat = CATEGORIES.find(c => c.key === key)!
     setCounts(prev => {
       const next = { ...prev, [key]: Math.max(0, prev[key] + delta) }
@@ -102,7 +162,6 @@ export default function Home() {
   }
 
   function changeMeeting(delta: number) {
-    if (!isToday) return
     setMeetings(prev => {
       const next = Math.max(0, prev + delta)
       scheduleSync(counts, next)
@@ -142,15 +201,15 @@ export default function Home() {
   }
 
   function resetAll() {
-    if (!isToday) return
-    if (!confirm('Reset your tallies for today to zero?')) return
+    if (!confirm(`Reset your tallies for ${isToday ? 'today' : selectedDate} to zero?`)) return
     setCounts(EMPTY_COUNTS)
     setMeetings(0)
     setLog([])
     if (userName) {
       supabase.from('daily_stats').upsert({
         user_name: userName,
-        date: todayISO(),
+        avatar,
+        date: selectedDate,
         na_count: 0, vm_count: 0, cb_count: 0, conn_count: 0, busy_count: 0,
         meetings: 0,
         updated_at: new Date().toISOString(),
@@ -163,7 +222,7 @@ export default function Home() {
   const bookingRate = total > 0 ? `${Math.round((meetings / total) * 100)}% booking rate` : '— booking rate'
   const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
-  if (!userName) return <NamePrompt onConfirm={setUserName} />
+  if (!userName) return <NamePrompt onConfirm={(name, av) => { setUserName(name); setAvatar(av) }} />
 
   return (
     <>
@@ -182,9 +241,11 @@ export default function Home() {
 
         {/* Header — full width */}
         <header>
-          <div className="eyebrow">Outbound calls</div>
-          <h1>Call Tally 🌊</h1>
-          <div className="date-display">{dateLabel}</div>
+          <h1>Cold Call Club 📞</h1>
+          <div className={`quote-display${quoteFade ? ' visible' : ''}`}>
+            {QUOTES[quoteIdx]}
+          </div>
+          <div className="date-display" style={{ marginTop: 6 }}>{dateLabel} · {clock}</div>
           {saving && <div className="date-display" style={{ color: '#9ed0d0', marginTop: 2 }}>saving…</div>}
         </header>
 
@@ -215,8 +276,8 @@ export default function Home() {
                 </div>
                 <div className="tally-count" style={{ color: cat.color }}>{counts[cat.key]}</div>
                 <div className="btn-row">
-                  <button className="tally-btn" onClick={() => change(cat.key, -1)} disabled={!isToday}>−</button>
-                  <button className="tally-btn plus-btn" onClick={() => change(cat.key, 1)} disabled={!isToday}>+</button>
+                  <button className="tally-btn" onClick={() => change(cat.key, -1)}>−</button>
+                  <button className="tally-btn plus-btn" onClick={() => change(cat.key, 1)}>+</button>
                 </div>
               </div>
             ))}
@@ -233,8 +294,8 @@ export default function Home() {
               <div className="booking-rate">{bookingRate}</div>
             </div>
             <div className="btn-row" style={{ flexDirection: 'column', gap: 8 }}>
-              <button id="meetingPlusBtn" className="meetings-plus" onClick={() => changeMeeting(1)} disabled={!isToday}>+</button>
-              <button className="tally-btn" style={{ width: 32, height: 32, fontSize: 18 }} onClick={() => changeMeeting(-1)} disabled={!isToday}>−</button>
+              <button id="meetingPlusBtn" className="meetings-plus" onClick={() => changeMeeting(1)}>+</button>
+              <button className="tally-btn" style={{ width: 32, height: 32, fontSize: 18 }} onClick={() => changeMeeting(-1)}>−</button>
             </div>
           </div>
 
@@ -252,11 +313,11 @@ export default function Home() {
               <div className="stat-label">Meetings</div>
               <div className="stat-value" style={{ color: '#0f6a6a' }}>{meetings}</div>
             </div>
-            {isToday && <button className="reset-btn" onClick={resetAll}>Reset</button>}
+            <button className="reset-btn" onClick={resetAll}>Reset</button>
           </div>
 
           {/* Log */}
-          {isToday && (
+          {(
             <div className="log-area">
               <div className="log-title">Recent activity</div>
               {log.length === 0
@@ -271,11 +332,14 @@ export default function Home() {
             </div>
           )}
 
+          {/* Stats panel */}
+          <StatsPanel userName={userName} />
+
           {/* Change name */}
-          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
             <button
               className="reset-btn"
-              onClick={() => { localStorage.removeItem('ct_user_name'); setUserName(null) }}
+              onClick={() => { localStorage.removeItem('ct_user_name'); localStorage.removeItem('ct_user_avatar'); setUserName(null) }}
             >
               change name ({userName})
             </button>

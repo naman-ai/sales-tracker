@@ -13,6 +13,7 @@ function toEntry(s: DailyStat): LeaderboardEntry {
   const total = totalAttempts(s)
   return {
     user_name: s.user_name,
+    avatar: s.avatar || '🐱',
     total,
     conn_count: s.conn_count,
     meetings: s.meetings,
@@ -76,6 +77,7 @@ export default function Leaderboard({ userName, date, refreshKey }: Props) {
                 {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
               </span>
               <span className={`lb-name${e.user_name === userName ? ' is-you' : ''}`}>
+                <span className="lb-avatar">{e.avatar}</span>
                 {e.user_name}{e.user_name === userName ? ' ✦' : ''}
               </span>
               <span className="lb-total">{e.total}</span>

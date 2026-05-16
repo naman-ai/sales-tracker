@@ -3,6 +3,7 @@ export type Category = 'na' | 'vm' | 'cb' | 'conn' | 'busy'
 export interface DailyStat {
   id: string
   user_name: string
+  avatar: string
   date: string
   na_count: number
   vm_count: number
@@ -15,6 +16,7 @@ export interface DailyStat {
 
 export interface LeaderboardEntry {
   user_name: string
+  avatar: string
   total: number
   conn_count: number
   meetings: number

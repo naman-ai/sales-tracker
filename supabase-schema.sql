@@ -3,6 +3,7 @@
 create table if not exists daily_stats (
   id           uuid primary key default gen_random_uuid(),
   user_name    text not null,
+  avatar       text not null default '🐱',
   date         date not null default current_date,
   na_count     int  not null default 0,
   vm_count     int  not null default 0,
@@ -13,6 +14,9 @@ create table if not exists daily_stats (
   updated_at   timestamptz not null default now(),
   unique (user_name, date)
 );
+
+-- If the table already exists, add the avatar column:
+alter table daily_stats add column if not exists avatar text not null default '🐱';
 
 -- Allow anyone with the anon key to read and write (no auth needed)
 alter table daily_stats enable row level security;
